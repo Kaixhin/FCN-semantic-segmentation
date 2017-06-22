@@ -100,5 +100,7 @@ ENV/
 # mypy
 .mypy_cache/
 
-# Results
+# Folders
+leftImg8bit_trainvaltest/
+gtFine_trainvaltest/
 results/
