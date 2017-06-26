@@ -15,6 +15,16 @@ Requirements
 - [matplotlib](https://matplotlib.org/)
 - [Cityscapes Dataset](https://www.cityscapes-dataset.com/)
 
+Instructions
+------------
+
+1. Install all of the required software. To feasibly run the training, CUDA is needed. The crop size and batch size can be tailored to your GPU memory (the default crop and batch sizes use ~10GB of GPU RAM).
+2. Register on the Cityscapes website to [access the dataset](https://www.cityscapes-dataset.com/downloads/).
+3. Download and extract the training/validation RGB data (`leftImg8bit_trainvaltest`) and ground truth data (`gtFine_trainvaltest`).
+4. Run `python main.py <options>`.
+
+First a Dataset object is set up, returning the RGB inputs, one-hot targets (for independent classification) and label targets. During training, the images are randomly cropped and horizontally flipped. Testing calculates IoU scores and produces a subset of coloured predictions that match the coloured ground truth.
+
 References
 ----------
 
