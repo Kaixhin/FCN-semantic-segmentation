@@ -1,7 +1,7 @@
 FCN-semantic-segmentation
 =========================
 
-Simple end-to-end semantic segmentation using fully convolutional networks [[1]](#references). Takes a pretrained 34-layer ResNet [[2]](#references), removes the fully connected layers, and adds transposed convolution layers with skip residual connections from lower layers. Initialises upsampling convolutions with bilinear interpolation filters and zeros the final (classification) layer. Uses an independent cross-entropy loss per class.
+Simple end-to-end semantic segmentation using fully convolutional networks [[1]](#references). Takes a pretrained 34-layer ResNet [[2]](#references), removes the fully connected layers, and adds transposed convolution layers with skip connections from lower layers. Initialises upsampling convolutions with bilinear interpolation filters and zeros the final (classification) layer. Uses an independent cross-entropy loss per class.
 
 Calculates and plots class-wise and mean intersection-over-union. Checkpoints the network every epoch.
 
