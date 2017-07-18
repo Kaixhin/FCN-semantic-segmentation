@@ -22,6 +22,7 @@ parser.add_argument('--workers', type=int, default=8, help='Data loader workers'
 parser.add_argument('--epochs', type=int, default=100, help='Training epochs')
 parser.add_argument('--crop-size', type=int, default=512, help='Training crop size')
 parser.add_argument('--lr', type=float, default=5e-5, help='Learning rate')
+parser.add_argument('--momentum', type=float, default=0, help='Momentum')
 parser.add_argument('--weight-decay', type=float, default=2e-4, help='Weight decay')
 parser.add_argument('--batch-size', type=int, default=16, help='Batch size')
 args = parser.parse_args()
@@ -44,7 +45,20 @@ pretrained_net = FeatureResNet()
 pretrained_net.load_state_dict(models.resnet34(pretrained=True).state_dict())
 net = SegResNet(num_classes, pretrained_net).cuda()
 crit = nn.BCELoss().cuda()
-optimiser = optim.RMSprop(net.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
+# Construct optimiser
+params_dict = dict(net.named_parameters())
+params = []
+for key, value in params_dict.items():
+  if '.bn' in key:
+    # No weight decay on batch norm
+    params += [{'params': [value], 'weight_decay': 0}]
+  elif '.bias' in key:
+    # No weight decay plus double learning rate on biases
+    params += [{'params': [value], 'lr': 2 * args.lr, 'weight_decay': 0}]
+  else:
+    params += [{'params': [value]}]
+optimiser = optim.RMSprop(params, lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 scores, mean_scores = [], []
 
 
