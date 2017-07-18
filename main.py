@@ -50,7 +50,7 @@ crit = nn.BCELoss().cuda()
 params_dict = dict(net.named_parameters())
 params = []
 for key, value in params_dict.items():
-  if '.bn' in key:
+  if 'bn' in key:
     # No weight decay on batch norm
     params += [{'params': [value], 'weight_decay': 0}]
   elif '.bias' in key:
