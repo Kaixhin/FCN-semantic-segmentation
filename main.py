@@ -44,7 +44,7 @@ val_loader = DataLoader(val_dataset, batch_size=1, num_workers=args.workers, pin
 pretrained_net = FeatureResNet()
 pretrained_net.load_state_dict(models.resnet34(pretrained=True).state_dict())
 net = SegResNet(num_classes, pretrained_net).cuda()
-crit = nn.BCELoss().cuda()
+crit = nn.NLLLoss2d(ignore_index=19).cuda()
 
 # Construct optimiser
 params_dict = dict(net.named_parameters())
@@ -64,10 +64,10 @@ scores, mean_scores = [], []
 
 def train(e):
   net.train()
-  for i, (input, target, _) in enumerate(train_loader):
+  for i, (input, _, target) in enumerate(train_loader):
     optimiser.zero_grad()
     input, target = Variable(input.cuda(async=True)), Variable(target.cuda(async=True))
-    output = F.sigmoid(net(input))
+    output = F.log_softmax(net(input))
     loss = crit(output, target)
     print(e, i, loss.data[0])
     loss.backward()
@@ -77,8 +77,7 @@ def train(e):
 # Calculates class intersections over unions
 def iou(pred, target):
   ious = []
-  # Ignore IoU for background class
-  for cls in range(num_classes - 1):
+  for cls in range(num_classes):
     pred_inds = pred == cls
     target_inds = target == cls
     intersection = (pred_inds[target_inds]).long().sum().data.cpu()[0]  # Cast to long to prevent overflows
@@ -99,6 +98,7 @@ def test(e):
     b, _, h, w = output.size()
     pred = output.permute(0, 2, 3, 1).contiguous().view(-1, num_classes).max(1)[1].view(b, h, w)
     total_ious.append(iou(pred, target))
+    print(e, i, 'Test')
 
     # Save images
     if i % 25 == 0:
@@ -122,7 +122,7 @@ def test(e):
 
   # Calculate average IoU
   total_ious = torch.Tensor(total_ious).transpose(0, 1)
-  ious = torch.Tensor(num_classes - 1)
+  ious = torch.Tensor(num_classes)
   for i, class_iou in enumerate(total_ious):
     ious[i] = class_iou[class_iou == class_iou].mean()  # Calculate mean, ignoring NaNs
   print(ious, ious.mean())
