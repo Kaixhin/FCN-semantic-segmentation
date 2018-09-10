@@ -14,7 +14,7 @@ def conv(in_planes, out_planes, kernel_size=3, stride=1, dilation=1, bias=False,
     for y in range(kernel_size):
       for x in range(kernel_size):
         w[y, x] = (1 - abs((x - centre) / stride)) * (1 - abs((y - centre) / stride))
-    layer.weight.data.copy_(w.div(in_planes).repeat(out_planes, in_planes, 1, 1))
+    layer.weight.data.copy_(w.div(in_planes).repeat(in_planes, out_planes, 1, 1))
   else:
     padding = (kernel_size + 2 * (dilation - 1)) // 2
     layer = nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation, bias=bias)
